@@ -1,0 +1,190 @@
+view_selection = "combined"; 
+
+$fn = 175; 
+
+
+// Base Dimensions
+base_dia = 80;        
+base_height = 20;
+groove_dia = 70;
+groove_depth = 17;    
+
+// Lid (Metal)
+lid_dia = 60;
+lid_height = 10;
+
+// Jar (Glass)
+jar_height = 150;
+jar_width = 70;
+jar_neck_dia = 60; 
+jar_neck_h = 20;
+glass_thick = 2;
+
+// Tree
+tree_height = 70;
+tree_width = 40; 
+
+floor_z = base_height - groove_depth; 
+
+
+module part_label(name, material, note_lines, dim_text) {
+    color("black")
+    linear_extrude(1) 
+    union() {
+        translate([0, 0, 0]) 
+            text(name, size=9, font="Liberation Sans:style=Bold", halign="center");
+       
+        translate([0, -14, 0]) 
+            text(str("Material: ", material), size=5.5, halign="center");
+        for (i = [0 : len(note_lines) - 1]) {
+             translate([0, -24 - (i * 8), 0]) 
+                text(note_lines[i], size=5, halign="center");
+        }
+        translate([0, -28 - (len(note_lines) * 8), 0]) 
+            text(str("Dimensions: ", dim_text), size=5.5, halign="center", font="Liberation Sans:style=Bold");
+    }
+}
+
+module header_text() {
+    color("black")
+    linear_extrude(1) 
+    union() {
+        text("FINAL DESIGN: Snow Globe with Wooden Base and Tree", size=12, halign="center", font="Liberation Sans:style=Bold");
+        translate([0, -18, 0])
+            text("Scale 1:1 | Units: Millimeters, Coordinate Plane corresponds with size", size=8, halign="center");
+    }
+}
+
+module letter_to_mrmeilinkhewontreadthiscode() {
+    color("black")
+    translate([50, -50, 0]) 
+    linear_extrude(1) 
+    union() {
+        text("Dear Mr. Meilink,", size=7);
+        translate([0, -12, 0]) text("Here is a 3D render of my final design.", size=6);
+        translate([0, -24, 0]) text("You can reference the code or look at the", size=6);
+        translate([0, -36, 0]) text("coordinate plane to see exact measurements.", size=6);
+        translate([0, -48, 0]) text("Everything is in millimeters.", size=6);
+        translate([0, -60, 0]) text("Annotations are clear.", size=6);
+        translate([0, -72, 0]) text("This is so much easier than drawing and erasing!", size=6);
+    }
+}
+
+
+module wood_base() {
+    color([0.65, 0.5, 0.35]) 
+    difference() {
+        union() {
+            cylinder(h = base_height, d = base_dia);
+            for(i=[2:4:base_height-2]) {
+                translate([0,0,i]) 
+                difference() {
+                    cylinder(h=0.5, d=base_dia+0.5);
+                    cylinder(h=0.5, d=base_dia-1);
+                }
+            }
+        }
+        translate([0, 0, floor_z]) 
+            cylinder(h = groove_depth + 1, d = groove_dia);
+        translate([0,0,-0.1])
+        rotate([180,0,0])
+        linear_extrude(1)
+            text("BASE", size=6, halign="center", valign="center");
+    }
+}
+
+module metallic_lid() {
+    color([0.85, 0.85, 0.85]) 
+    union() {
+        difference() {
+            cylinder(h=lid_height, d=lid_dia);
+            translate([0,0,-0.1]) cylinder(h=lid_height-1, d=lid_dia-2);
+        }
+        for(z=[2:2.5:lid_height-2]) {
+            translate([0,0,z]) cylinder(h=0.5, d=lid_dia+0.8);
+        }
+    }
+}
+
+module christmas_tree() {
+    color("ForestGreen") 
+    union() {
+        color("SaddleBrown") cylinder(h=10, r=6);
+        translate([0,0,10]) cylinder(h=25, r1=tree_width/2, r2=8, $fn=6);
+        translate([0,0,30]) cylinder(h=20, r1=15, r2=4, $fn=6);
+        translate([0,0,45]) cylinder(h=25, r1=10, r2=0, $fn=6);
+        color("Gold") translate([0,0,70]) sphere(r=3.5, $fn=50);
+    }
+}
+
+module glass_jar() {
+    color([0.85, 0.95, 1, 0.3]) 
+    difference() {
+        union() {
+            cylinder(h=15, d=jar_neck_dia);
+            translate([0,0,4]) cylinder(h=1.5, d=jar_neck_dia+1.5);
+            translate([0,0,8]) cylinder(h=1.5, d=jar_neck_dia+1.5);
+            translate([0,0,12]) cylinder(h=1.5, d=jar_neck_dia+1.5);
+            translate([0,0,15]) cylinder(h=10, d1=jar_neck_dia, d2=jar_width);
+            translate([0,0,25]) cylinder(h=jar_height-28, d=jar_width);
+            translate([0,0,jar_height-3]) 
+                minkowski() {
+                    cylinder(h=1, d=jar_width-4);
+                    sphere(r=2, $fn=50); 
+                }
+        }
+        translate([0,0,-1]) cylinder(h=jar_height-4, d1=jar_neck_dia-4, d2=jar_width-6);
+    }
+}
+
+
+if (view_selection == "combined") {
+        translate([400, 250, 0]) header_text();
+        letter_to_mrmeilinkhewontreadthiscode();
+    translate([80, 160, 0]) {
+        wood_base();
+        translate([0, 0, floor_z]) metallic_lid();
+        translate([0, 0, floor_z + lid_height]) christmas_tree();
+        translate([0, 0, floor_z]) glass_jar();
+    }
+    translate([80, 80, 0]) 
+        part_label("FINAL ASSEMBLY", "All Parts", ["Fully Assembled View"], "H: ~160mm");
+
+    
+  
+    translate([250, 160, 0]) wood_base();
+    translate([250, 80, 0]) 
+        part_label("BASE STAND", "Maple Wood", 
+            ["Varnished with grain texture.", "Groove: 12mm deep / 70mm wide"], 
+            "80mm x 20mm");
+    translate([420, 160, 0]) metallic_lid();
+    translate([420, 80, 0]) 
+        part_label("LID", "Aluminum/Tin", 
+            ["Smooth Metallic Finish", "Also an adhesive is prob gonna be added"], 
+            "60mm x 10mm");
+    translate([580, 160, 0]) christmas_tree();
+    translate([580, 80, 0]) 
+        part_label("TREE", "PLA Plastic", 
+            ["OPEnSCad cant really capture the detail of the org", "Printed in Green Filament"], 
+            "40mm x 70mm");
+    translate([750, 160, 0]) glass_jar();
+    translate([750, 80, 0]) 
+        part_label("MASON JAR", "Borosilicate Glass", 
+            ["Clear / Slight Blue Tint", "Vacuum Sealed"], 
+            "70mm x 150mm");
+
+
+} else if (view_selection == "assembly") {
+    wood_base();
+    translate([0, 0, floor_z]) metallic_lid();
+    translate([0, 0, floor_z + lid_height]) christmas_tree();
+    translate([0, 0, floor_z]) glass_jar();
+} else if (view_selection == "base") {
+    wood_base();
+} else if (view_selection == "lid") {
+    metallic_lid();
+} else if (view_selection == "tree") {
+    christmas_tree();
+} else if (view_selection == "jar") {
+    glass_jar();
+}
